@@ -86,4 +86,26 @@ object DataSources extends App {
       )
     )
     .json("src/main/resources/data/cars.json")
+
+  // CSV flags
+  val stocksSchema = StructType(
+    Array(
+      StructField("symbol", StringType),
+      StructField("date", DateType),
+      StructField("price", DoubleType)
+    )
+  )
+
+  val stocks = spark.read
+    .schema(stocksSchema)
+    .options(
+      Map(
+        "dateFormat" -> "MMM dd YYYY",
+        "header" -> "true",
+        "sep" -> ",", // default: ','
+        "nullValue" -> ""
+      )
+    )
+    .csv("src/main/resources/data/stocks.csv")
+
 }
