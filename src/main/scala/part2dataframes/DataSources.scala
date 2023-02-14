@@ -7,6 +7,7 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.types.DoubleType
 import org.apache.spark.sql.types.LongType
 import org.apache.spark.sql.SaveMode
+import org.apache.spark.sql.types.DateType
 
 object DataSources extends App {
   val spark = SparkSession
@@ -25,7 +26,7 @@ object DataSources extends App {
       StructField("Horsepower", LongType),
       StructField("Weight_in_lbs", LongType),
       StructField("Acceleration", DoubleType),
-      StructField("Year", StringType),
+      StructField("Year", DateType),
       StructField("Origin", StringType)
     )
   )
@@ -74,4 +75,15 @@ object DataSources extends App {
     .option("path", "src/main/resources/data/cars_dup.json")
     .save()
 
+  // JSON flags
+  spark.read
+    .schema(carsSchema)
+    .options(
+      Map(
+        "dateFormat" -> "YYYY-MM-dd", // couple with schema; if Spark fails parsing, it will put null
+        "allowSingleQuotes" -> "true",
+        "compression" -> "uncompressed" // bzip2, gzip, lz4, snappy, deflate
+      )
+    )
+    .json("src/main/resources/data/cars.json")
 }
