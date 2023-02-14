@@ -1,5 +1,12 @@
 .metals/
 .vscode/
+.bloop/
+
+project/metals.sbt
+project/project/
+project/target/
+target/
+
 # Created by https://www.gitignore.io/api/sbt,scala,spark,intellij
 # Edit at https://www.gitignore.io/?templates=sbt,scala,spark,intellij
 
