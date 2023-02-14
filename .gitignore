@@ -1,4 +1,5 @@
-
+.metals/
+.vscode/
 # Created by https://www.gitignore.io/api/sbt,scala,spark,intellij
 # Edit at https://www.gitignore.io/?templates=sbt,scala,spark,intellij
 
