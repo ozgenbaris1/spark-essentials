@@ -72,6 +72,7 @@ object ScalaRecap extends App {
 
   // future
   import scala.concurrent.ExecutionContext.Implicits.global
+  import scala.concurrent.Future
   import scala.util.Success
   import scala.util.Failure
 
