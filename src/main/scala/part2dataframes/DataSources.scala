@@ -108,4 +108,9 @@ object DataSources extends App {
     )
     .csv("src/main/resources/data/stocks.csv")
 
+  // Parquet
+  carsDF.write
+    .mode(SaveMode.Overwrite)
+    .parquet("src/main/resources/data/cars.parquet")
+
 }
