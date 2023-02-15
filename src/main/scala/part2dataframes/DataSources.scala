@@ -113,4 +113,6 @@ object DataSources extends App {
     .mode(SaveMode.Overwrite)
     .parquet("src/main/resources/data/cars.parquet")
 
+  // Text files
+  spark.read.text("src/main/resources/data/sampleTextFile.txt").show()
 }
