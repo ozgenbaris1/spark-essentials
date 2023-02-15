@@ -132,4 +132,43 @@ object DataSources extends App {
 
   employees.show()
 
+  /** Exercise: read the movies DF, then write it as:
+    *   - tab seperated values file
+    *   - snappy Parquet
+    *   - table called public.movies in the postgres db
+    */
+
+  val moviesDF = spark.read
+    .option("inferSchema", "true")
+    .json("src/main/resources/data/movies.json")
+
+  moviesDF.write
+    .mode(SaveMode.Overwrite)
+    .option("sep", "\t")
+    .option("header", "true")
+    .csv("src/main/resources/data/movies.csv")
+
+  moviesDF.write
+    .mode(SaveMode.Overwrite)
+    .option("compression", "snappy")
+    .parquet("src/main/resources/data/movies.parquet")
+
+  val driver = "org.postgresql.Driver"
+  val url = "jdbc:postgresql://localhost:5432/rtjvm"
+  val user = "docker"
+  val password = "docker"
+
+  moviesDF.write
+    .format("jdbc")
+    .options(
+      Map(
+        "driver" -> driver,
+        "url" -> url,
+        "user" -> user,
+        "password" -> password,
+        "dbtable" -> "public.movies"
+      )
+    )
+    .save()
+
 }
