@@ -115,4 +115,21 @@ object DataSources extends App {
 
   // Text files
   spark.read.text("src/main/resources/data/sampleTextFile.txt").show()
+
+  // Reading from a remote DB
+  val employees = spark.read
+    .format("jdbc")
+    .options(
+      Map(
+        "driver" -> "org.postgresql.Driver",
+        "url" -> "jdbc:postgresql://localhost:5432/rtjvm",
+        "user" -> "docker",
+        "password" -> "docker",
+        "dbtable" -> "public.employees"
+      )
+    )
+    .load()
+
+  employees.show()
+
 }
