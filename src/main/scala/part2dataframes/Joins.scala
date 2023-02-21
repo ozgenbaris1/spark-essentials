@@ -1,6 +1,7 @@
 package part2dataframes
 
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.{max, col}
 
 object Joins extends App {
   val spark =
@@ -46,5 +47,52 @@ object Joins extends App {
   guitaristsDF.join(bandsDF.withColumnRenamed("id", "band"), "band")
 
   guitaristsBandsDF.drop(bandsDF.col("id"))
+
+  /** Exercises
+    *
+    *   - show all employees and their max salary
+    *   - show all employees who were never manager
+    *   - find the job titles of the best paid 10 employees in the company
+    */
+
+  def readTable(table: String) = spark.read
+    .format("jdbc")
+    .options(
+      Map(
+        "driver" -> "org.postgresql.Driver",
+        "url" -> "jdbc:postgresql://localhost:5432/rtjvm",
+        "user" -> "docker",
+        "password" -> "docker",
+        "dbtable" -> s"public.$table"
+      )
+    )
+    .load()
+
+  val employeesDF = readTable("employees")
+  val salariesDF = readTable("salaries")
+
+  val maxSalariesPerEmployeeDF =
+    salariesDF.groupBy(col("emp_no")).agg(max("salary").as("salary"))
+
+  val employeeSalaryDF = employeesDF.join(maxSalariesPerEmployeeDF, "emp_no")
+
+  val managersDF = readTable("dept_manager")
+
+  val nonManagersDF = employeesDF.join(
+    managersDF,
+    managersDF.col("emp_no") === employeesDF.col("emp_no"),
+    "left_anti"
+  )
+
+  val titlesDF = readTable("titles")
+
+  val mostRecentJobTitlesDF =
+    titlesDF.groupBy("emp_no", "title").agg(max("to_date"))
+
+  val topPaidEmployees = employeeSalaryDF.orderBy(col("salary").desc).limit(10)
+
+  val topPaidTitles = topPaidEmployees.join(mostRecentJobTitlesDF, "emp_no")
+
+  topPaidTitles.show()
 
 }
