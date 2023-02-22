@@ -45,7 +45,7 @@ object Datasets extends App {
   val carsDS = carsDF.as[Car]
 
   // DS collection functions
-  numbersDS.filter(_ < 100).show()
+  numbersDS.filter(_ < 100)
 
   // map, flatMap, fold, reduce, for comprehension ...
   val carNamesDS = carsDS.map(car => car.Name.toUpperCase())
@@ -61,5 +61,43 @@ object Datasets extends App {
   println(carsDS.filter(_.Horsepower.getOrElse(0L) > 140).count)
 
   println(carsDS.map(_.Horsepower.getOrElse(0L)).reduce(_ + _) / carsCount)
+
+  // Joins
+  case class Guitar(id: Long, make: String, model: String, guitarType: String)
+  case class GuitarPlayer(
+      id: Long,
+      name: String,
+      guitars: Seq[Long],
+      band: Long
+  )
+  case class Band(id: Long, name: String, hometown: String, year: Long)
+
+  val guitarsDS = readDF("guitars.json").as[Guitar]
+  val guitarPlayersDS = readDF("guitarPlayers.json").as[GuitarPlayer]
+  val bandsDS = readDF("bands.json").as[Band]
+
+  val guitarPLayerBandsDS: Dataset[(GuitarPlayer, Band)] =
+    guitarPlayersDS.joinWith(
+      bandsDS,
+      guitarPlayersDS.col("band") === bandsDS.col("id"),
+      "inner"
+    )
+
+  /** Exercise:
+    *   1. join the guitarsDS and guitarPlayersDS in an outer join (hint: use
+    *      array_contains)
+    */
+
+  guitarPlayersDS
+    .joinWith(
+      guitarsDS,
+      array_contains(guitarPlayersDS.col("guitars"), guitarsDS.col("id")),
+      "outer"
+    )
+
+  // grouping datasets
+  val carsGroupedByOrigin = carsDS.groupByKey(_.Origin).count()
+
+  // joins and groups are WIDE transformations, will involve SHUFFLE operations
 
 }
